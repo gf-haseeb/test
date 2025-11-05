@@ -1,0 +1,84 @@
+{
+  "ordering_strategy": "manual",
+  "created_at": "2025-11-05T15:34:46.668848",
+  "modified_at": "2025-11-05T15:34:46.682017",
+  "lists": [
+    {
+      "id": 1,
+      "name": "Work - Sprint 1",
+      "description": "Work-related tasks",
+      "created_at": "2025-11-05T15:34:46.668912",
+      "modified_at": "2025-11-05T15:34:46.682010",
+      "tasks": [
+        {
+          "id": 1,
+          "title": "Finish documentation",
+          "description": "",
+          "status": "completed",
+          "priority": "high",
+          "due_date": null,
+          "tags": [],
+          "created_at": "2025-11-05T15:34:46.669564",
+          "modified_at": "2025-11-05T15:34:46.679177"
+        },
+        {
+          "id": 2,
+          "title": "Review pull requests",
+          "description": "",
+          "status": "todo",
+          "priority": "medium",
+          "due_date": null,
+          "tags": [
+            "review"
+          ],
+          "created_at": "2025-11-05T15:34:46.678046",
+          "modified_at": "2025-11-05T15:34:46.678055"
+        },
+        {
+          "id": 3,
+          "title": "Team meeting",
+          "description": "",
+          "status": "in_progress",
+          "priority": "medium",
+          "due_date": null,
+          "tags": [],
+          "created_at": "2025-11-05T15:34:46.678375",
+          "modified_at": "2025-11-05T15:34:46.678924"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Personal",
+      "description": "Personal tasks",
+      "created_at": "2025-11-05T15:34:46.669268",
+      "modified_at": "2025-11-05T15:34:46.682404",
+      "tasks": [
+        {
+          "id": 5,
+          "title": "Exercise 30 minutes",
+          "description": "",
+          "status": "todo",
+          "priority": "high",
+          "due_date": null,
+          "tags": [
+            "health",
+            "daily"
+          ],
+          "created_at": "2025-11-05T15:34:46.681094",
+          "modified_at": "2025-11-05T15:34:46.681102"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "1": {
+      "custom_index": 0,
+      "created_at": "2025-11-05T15:34:46.668916"
+    },
+    "2": {
+      "custom_index": 1,
+      "created_at": "2025-11-05T15:34:46.669274"
+    }
+  }
+}
