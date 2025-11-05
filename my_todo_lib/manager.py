@@ -279,6 +279,55 @@ class TaskManager:
             self.save()
         return result
 
+    def move_task_to_list(
+        self,
+        source_list_id: int,
+        task_id: int,
+        target_list_id: int,
+    ) -> Task:
+        """Move a task from one list to another.
+
+        Args:
+            source_list_id: ID of the source list (where task currently is)
+            task_id: ID of the task to move
+            target_list_id: ID of the target list (where task will go)
+
+        Returns:
+            The moved Task object
+
+        Raises:
+            ValueError: If source list, target list, or task not found
+        """
+        # Get source list
+        source_list = self.get_list(source_list_id)
+        if source_list is None:
+            raise ValueError(f"Source list with ID {source_list_id} not found")
+
+        # Get target list
+        target_list = self.get_list(target_list_id)
+        if target_list is None:
+            raise ValueError(f"Target list with ID {target_list_id} not found")
+
+        # Cannot move task to same list
+        if source_list_id == target_list_id:
+            raise ValueError("Source and target lists cannot be the same")
+
+        # Get the task from source list
+        task = source_list.get_task(task_id)
+        if task is None:
+            raise ValueError(f"Task with ID {task_id} not found in source list")
+
+        # Remove task from source list
+        source_list.remove_task(task_id)
+
+        # Add task to target list
+        target_list.add_task(task)
+
+        # Save changes
+        self.save()
+
+        return task
+
     def search_tasks_across_lists(
         self,
         query: str,

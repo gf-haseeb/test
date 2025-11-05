@@ -298,8 +298,9 @@ class TodoCLI:
             "3": "Mark task complete",
             "4": "Update task",
             "5": "Delete task",
-            "6": "Filter tasks",
-            "7": "Back to main menu",
+            "6": "Move task to another list",
+            "7": "Filter tasks",
+            "8": "Back to main menu",
         }
 
         self.print_menu(options)
@@ -311,8 +312,9 @@ class TodoCLI:
             "3": self.mark_complete,
             "4": self.update_task,
             "5": self.delete_task,
-            "6": self.filter_tasks,
-            "7": self.show_main_menu,
+            "6": self.move_task,
+            "7": self.filter_tasks,
+            "8": self.show_main_menu,
         }
 
         if choice in actions:
@@ -509,6 +511,83 @@ class TodoCLI:
             print("❌ Please enter a number.")
             input("Press Enter to continue...")
 
+    def move_task(self) -> None:
+        """Move a task to another list."""
+        tasks = self.manager.get_tasks(self.current_list_id)
+
+        if not tasks:
+            print("\n📭 No tasks to move.")
+            input("Press Enter to continue...")
+            return
+
+        print("\n📦 Move Task to Another List")
+        print("-" * 70)
+        for i, task in enumerate(tasks, 1):
+            print(f"  {i}. {task.title}")
+
+        try:
+            choice = int(self.get_input("Select task number to move: "))
+            if 1 <= choice <= len(tasks):
+                task = tasks[choice - 1]
+
+                # Show available lists
+                all_lists = self.manager.get_lists()
+                other_lists = [lst for lst in all_lists if lst.id != self.current_list_id]
+
+                if not other_lists:
+                    print("\n❌ No other lists available. Create a new list first!")
+                    input("Press Enter to continue...")
+                    return
+
+                print("\n📂 Available Lists:")
+                print("-" * 70)
+                for i, lst in enumerate(other_lists, 1):
+                    print(f"  {i}. {lst.name}")
+                print(f"  {len(other_lists) + 1}. Create new list and move")
+
+                target_choice = self.get_input("Select target list or create new: ")
+
+                if target_choice == str(len(other_lists) + 1):
+                    # Create new list
+                    new_list_name = self.get_input("New list name: ")
+                    if not new_list_name:
+                        print("❌ List name cannot be empty.")
+                        input("Press Enter to continue...")
+                        return
+
+                    new_list = self.manager.create_list(new_list_name)
+                    target_list_id = new_list.id
+                    target_list_name = new_list.name
+                elif target_choice.isdigit() and 1 <= int(target_choice) <= len(other_lists):
+                    target_list_id = other_lists[int(target_choice) - 1].id
+                    target_list_name = other_lists[int(target_choice) - 1].name
+                else:
+                    print("❌ Invalid selection.")
+                    input("Press Enter to continue...")
+                    return
+
+                # Move the task
+                try:
+                    self.manager.move_task_to_list(
+                        self.current_list_id,
+                        task.id,
+                        target_list_id
+                    )
+                    print(f"\n✅ Task '{task.title}' moved to '{target_list_name}'!")
+                    # Switch to the new list
+                    self.current_list_id = target_list_id
+                except ValueError as e:
+                    print(f"\n❌ Error: {e}")
+
+                input("Press Enter to continue...")
+                self.task_management_menu()
+            else:
+                print("❌ Invalid selection.")
+                input("Press Enter to continue...")
+        except ValueError:
+            print("❌ Please enter a number.")
+            input("Press Enter to continue...")
+
     def filter_tasks(self) -> None:
         """Filter tasks by status."""
         print("\n🔍 Filter Tasks")
@@ -566,7 +645,7 @@ class TodoCLI:
         search_map = {"1": "title", "2": "description", "3": "tags"}
         search_in = search_map.get(search_choice, "title")
 
-        query = self.get_input(f"Enter search term: ")
+        query = self.get_input("Enter search term: ")
 
         if not query:
             print("❌ Search query cannot be empty.")

@@ -187,6 +187,107 @@ class TestTaskManagerTaskOperations:
 
             assert manager.get_task(task_list.id, task.id) is None
 
+    def test_move_task_to_list(self):
+        """Test moving a task to another list."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            file_path = os.path.join(tmpdir, "tasks.json")
+            manager = TaskManager(storage=JSONStorage(file_path))
+
+            # Create two lists
+            list1 = manager.create_list("Work")
+            list2 = manager.create_list("Personal")
+
+            # Add task to list1
+            task = manager.add_task_to_list(list1.id, "Fix bug")
+            assert manager.get_task(list1.id, task.id) is not None
+
+            # Move task to list2
+            moved_task = manager.move_task_to_list(list1.id, task.id, list2.id)
+
+            # Verify task is no longer in list1
+            assert manager.get_task(list1.id, task.id) is None
+
+            # Verify task is now in list2
+            assert manager.get_task(list2.id, task.id) is not None
+            assert moved_task.title == "Fix bug"
+
+    def test_move_task_to_list_same_list_error(self):
+        """Test moving task to same list raises error."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            file_path = os.path.join(tmpdir, "tasks.json")
+            manager = TaskManager(storage=JSONStorage(file_path))
+
+            list1 = manager.create_list("Work")
+            task = manager.add_task_to_list(list1.id, "Fix bug")
+
+            # Try to move to same list
+            with pytest.raises(ValueError, match="Source and target lists cannot be the same"):
+                manager.move_task_to_list(list1.id, task.id, list1.id)
+
+    def test_move_task_source_list_not_found(self):
+        """Test moving task from non-existent source list."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            file_path = os.path.join(tmpdir, "tasks.json")
+            manager = TaskManager(storage=JSONStorage(file_path))
+
+            list1 = manager.create_list("Work")
+
+            with pytest.raises(ValueError, match="Source list with ID"):
+                manager.move_task_to_list(999, 1, list1.id)
+
+    def test_move_task_target_list_not_found(self):
+        """Test moving task to non-existent target list."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            file_path = os.path.join(tmpdir, "tasks.json")
+            manager = TaskManager(storage=JSONStorage(file_path))
+
+            list1 = manager.create_list("Work")
+            task = manager.add_task_to_list(list1.id, "Fix bug")
+
+            with pytest.raises(ValueError, match="Target list with ID"):
+                manager.move_task_to_list(list1.id, task.id, 999)
+
+    def test_move_task_not_found(self):
+        """Test moving non-existent task."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            file_path = os.path.join(tmpdir, "tasks.json")
+            manager = TaskManager(storage=JSONStorage(file_path))
+
+            list1 = manager.create_list("Work")
+            list2 = manager.create_list("Personal")
+
+            with pytest.raises(ValueError, match="Task with ID"):
+                manager.move_task_to_list(list1.id, 999, list2.id)
+
+    def test_move_task_preserves_data(self):
+        """Test that moving task preserves all its data."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            file_path = os.path.join(tmpdir, "tasks.json")
+            manager = TaskManager(storage=JSONStorage(file_path))
+
+            list1 = manager.create_list("Work")
+            list2 = manager.create_list("Personal")
+
+            # Create task with all properties
+            task = manager.add_task_to_list(
+                list1.id,
+                title="Important task",
+                description="This is important",
+                priority=Priority.HIGH,
+                status=TaskStatus.IN_PROGRESS,
+                tags=["urgent", "work"]
+            )
+
+            # Move task to list2
+            moved_task = manager.move_task_to_list(list1.id, task.id, list2.id)
+
+            # Verify all properties are preserved
+            assert moved_task.title == "Important task"
+            assert moved_task.description == "This is important"
+            assert moved_task.priority == Priority.HIGH
+            assert moved_task.status == TaskStatus.IN_PROGRESS
+            assert moved_task.tags == ["urgent", "work"]
+
 
 class TestTaskManagerSearch:
     """Test TaskManager search functionality."""
